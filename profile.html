@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Terra & Tide</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Terra & Tide</a>
+        <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search products...">
+            <button id="search-btn">🔍</button>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="collections.html">Collections</a></li>
+                <li><a href="about.html">Our Story</a></li>
+                <li id="nav-auth"><a href="login.html">Login</a></li>
+                <li><a href="wishlist.html">❤️</a></li>
+                <li>
+                    <a href="cart.html" class="cart-icon">
+                        🛒
+                        <span id="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="toast" class="toast"></div>
+
+    <div class="container">
+        <h2 class="section-title">My Profile</h2>
+        <div class="profile-info">
+            <h3 id="user-greeting">Hello, Guest</h3>
+            <button onclick="logout()" class="btn-checkout">Logout</button>
+        </div>
+
+        <h3>Order History</h3>
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body">
+                <!-- Orders loaded dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Terra & Tide. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('terraUser'));
+            if (user) {
+                document.getElementById('user-greeting').textContent = `Hello, ${user.username}`;
+                loadOrders();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('terraOrders') || '[]');
+            const tbody = document.getElementById('orders-table-body');
+
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No orders yet.</td></tr>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.date}</td>
+                    <td>$${order.total.toFixed(2)}</td>
+                    <td><span class="eco-badge">Processing</span></td>
+                    <td>${order.items.length} items</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>

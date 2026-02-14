@@ -130,17 +130,62 @@ function showToast(message) {
     }
 }
 
-// --- Product Rendering ---
+// --- Wishlist Logic ---
+
+function getWishlist() {
+    return JSON.parse(localStorage.getItem('terraWishlist') || '[]');
+}
+
+function toggleWishlist(id, name, price, image) {
+    let wishlist = getWishlist();
+    const index = wishlist.findIndex(item => item.id === id);
+
+    if (index > -1) {
+        wishlist.splice(index, 1);
+        showToast('Removed from wishlist');
+    } else {
+        wishlist.push({ id, name, price, image });
+        showToast('Added to wishlist');
+    }
+
+    localStorage.setItem('terraWishlist', JSON.stringify(wishlist));
+
+    // Update button style if we are on a page with products
+    const btn = document.getElementById(`wish-${id}`);
+    if (btn) {
+        btn.classList.toggle('active');
+        btn.innerHTML = index > -1 ? '&#9825;' : '&#10084;'; // Toggle heart
+    }
+}
+
+
+// --- Product Rendering & Filtering ---
+
+let currentCategoryProducts = [];
 
 function loadProducts(category) {
     const container = document.getElementById('product-container');
     if (!container) return;
 
-    const categoryProducts = products[category];
-    if (!categoryProducts) return;
+    currentCategoryProducts = products[category];
+    if (!currentCategoryProducts) return;
+
+    renderProductGrid(currentCategoryProducts);
+}
+
+function renderProductGrid(productsToRender) {
+    const container = document.getElementById('product-container');
+    if (!container) return;
 
     container.innerHTML = '';
-    categoryProducts.forEach(product => {
+    const wishlist = getWishlist();
+
+    if (productsToRender.length === 0) {
+        container.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">No products found.</p>';
+        return;
+    }
+
+    productsToRender.forEach(product => {
         const card = document.createElement('div');
         card.className = 'card';
 
@@ -149,12 +194,16 @@ function loadProducts(category) {
             ecoBadge = '<span class="eco-badge">Eco-Choice</span>';
         }
 
-        // Escape arguments for addToCart to handle potential quotes in names (though our data is safe)
         const safeName = product.name.replace(/'/g, "\\'");
         const safeImage = product.image.replace(/'/g, "\\'");
 
+        const isWishlisted = wishlist.some(item => item.id === product.id);
+        const heartIcon = isWishlisted ? '&#10084;' : '&#9825;'; // Filled or empty heart
+        const activeClass = isWishlisted ? 'active' : '';
+
         card.innerHTML = `
             <img src="${product.image}" alt="${product.name}">
+            <button id="wish-${product.id}" class="wishlist-btn ${activeClass}" onclick="toggleWishlist('${product.id}', '${safeName}', ${product.price}, '${safeImage}')">${heartIcon}</button>
             <div class="card-body">
                 <h3 class="card-title">${product.name}</h3>
                 <div class="card-price">$${product.price.toFixed(2)}</div>
@@ -168,6 +217,90 @@ function loadProducts(category) {
         `;
         container.appendChild(card);
     });
+}
+
+function filterProducts() {
+    const sortValue = document.getElementById('sort-select').value;
+    const filterValue = document.getElementById('filter-select').value;
+
+    let filtered = [...currentCategoryProducts];
+
+    // Filter by Eco-Score
+    if (filterValue === 'eco') {
+        filtered = filtered.filter(p => p.score >= 9);
+    }
+
+    // Sort
+    if (sortValue === 'price-asc') {
+        filtered.sort((a, b) => a.price - b.price);
+    } else if (sortValue === 'price-desc') {
+        filtered.sort((a, b) => b.price - a.price);
+    }
+
+    renderProductGrid(filtered);
+}
+
+
+// --- Search Logic ---
+function initSearch() {
+    const searchBtn = document.getElementById('search-btn');
+    const searchInput = document.getElementById('search-input');
+
+    if (searchBtn && searchInput) {
+        const performSearch = () => {
+            const query = searchInput.value.toLowerCase();
+            if (!query) return;
+
+            // Flatten all products
+            const allProducts = [
+                ...products.living,
+                ...products.kitchen,
+                ...products.wellness
+            ];
+
+            const results = allProducts.filter(p =>
+                p.name.toLowerCase().includes(query) ||
+                p.sustainability.toLowerCase().includes(query)
+            );
+
+            // Store results in localStorage to pass to a results page,
+            // OR reuse the current page grid if it exists.
+            // For simplicity, let's redirect to a virtual 'search' category on collection page or reuse current page if grid exists.
+
+            const container = document.getElementById('product-container');
+            if (container) {
+                // If we are on a page with a grid, show results there
+                document.querySelector('.section-title').textContent = `Search Results for "${query}"`;
+                // Hide filters if searching
+                const filters = document.querySelector('.filter-controls');
+                if (filters) filters.style.display = 'none';
+
+                renderProductGrid(results);
+            } else {
+                // If not on a product page, redirect to living.html (as a generic search page)
+                // In a real app, we'd have search.html
+                // Hack: Pass query via URL param
+                window.location.href = `living.html?search=${encodeURIComponent(query)}`;
+            }
+        };
+
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+    }
+}
+
+// --- Mobile Menu ---
+function initMobileMenu() {
+    const toggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('nav');
+
+    if (toggle && nav) {
+        toggle.addEventListener('click', () => {
+            nav.classList.toggle('active');
+        });
+    }
 }
 
 // --- User Auth ---
@@ -192,7 +325,7 @@ function signup(username, email, password) {
 
 function logout() {
     localStorage.removeItem('terraUser');
-    window.location.reload();
+    window.location.href = 'index.html';
 }
 
 function checkLogin() {
@@ -201,7 +334,7 @@ function checkLogin() {
     if (navAuth) {
         if (userStr) {
             const user = JSON.parse(userStr);
-             navAuth.innerHTML = `<a href="#" onclick="logout()">Logout (${user.username})</a>`;
+             navAuth.innerHTML = `<a href="profile.html">Profile (${user.username})</a>`;
         } else {
              navAuth.innerHTML = `<a href="login.html">Login</a>`;
         }
@@ -213,12 +346,31 @@ function checkLogin() {
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     checkLogin();
+    initSearch();
+    initMobileMenu();
 
-    // Check if we are on a category page
-    const path = window.location.pathname;
-    if (path.includes('living')) loadProducts('living');
-    if (path.includes('kitchen')) loadProducts('kitchen');
-    if (path.includes('wellness')) loadProducts('wellness');
+    // Check URL params for search
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
 
-    if (path.includes('cart')) renderCart();
+    if (searchQuery) {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) searchInput.value = searchQuery;
+         // Trigger search logic
+         // We need to wait for loadProducts to finish or manually trigger
+         // Since loadProducts is below, we need a slight delay or restructure.
+         // Better: Let loadProducts run, then override if search exists.
+         setTimeout(() => {
+             const searchBtn = document.getElementById('search-btn');
+             if(searchBtn) searchBtn.click();
+         }, 100);
+    } else {
+        // Normal Category Loading
+        const path = window.location.pathname;
+        if (path.includes('living')) loadProducts('living');
+        if (path.includes('kitchen')) loadProducts('kitchen');
+        if (path.includes('wellness')) loadProducts('wellness');
+    }
+
+    if (window.location.pathname.includes('cart')) renderCart();
 });

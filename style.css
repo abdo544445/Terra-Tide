@@ -38,6 +38,14 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap; /* Allow wrapping for mobile */
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
 }
 
 .logo {
@@ -48,12 +56,50 @@ header {
     color: var(--primary-color);
 }
 
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--primary-color);
+}
+
+.search-container {
+    display: flex;
+    margin: 0 1rem;
+    flex: 1;
+    max-width: 400px;
+}
+
+#search-input {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+}
+
+#search-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+}
+
 nav ul {
     list-style: none;
     display: flex;
     gap: 1.5rem;
     padding: 0;
     margin: 0;
+    align-items: center;
 }
 
 nav li {
@@ -153,6 +199,22 @@ nav a:hover {
     gap: 2rem;
 }
 
+/* Filter Controls */
+.filter-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-controls select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: var(--font-body);
+}
+
 /* Cards */
 .card {
     background-color: var(--card-bg-color);
@@ -162,6 +224,7 @@ nav a:hover {
     transition: transform 0.3s;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .card:hover {
@@ -173,6 +236,33 @@ nav a:hover {
     height: 250px;
     object-fit: cover;
 }
+
+.wishlist-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+
+.wishlist-btn:hover {
+    transform: scale(1.1);
+}
+
+.wishlist-btn.active {
+    color: red;
+}
+
 
 .card-body {
     padding: 1.5rem;
@@ -297,6 +387,37 @@ nav a:hover {
     cursor: pointer;
     margin-top: 1rem;
     float: right;
+    text-decoration: none; /* In case it's a link */
+}
+
+/* Checkout Page */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.checkout-form, .order-summary {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.summary-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Profile Page */
+.profile-info {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* Forms */
@@ -409,4 +530,56 @@ footer {
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 3rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    header {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .logo-container {
+        flex: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .search-container {
+        order: 2; /* Search bar below nav on mobile? Or above? */
+        flex: 100%;
+        margin: 0 0 1rem 0;
+        max-width: none;
+    }
+
+    nav {
+        display: none;
+        width: 100%;
+        order: 3;
+    }
+
+    nav.active {
+        display: block;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    nav li {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .checkout-grid {
+        grid-template-columns: 1fr;
+    }
 }

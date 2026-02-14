@@ -8,12 +8,20 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">Terra & Tide</a>
+        <div class="logo-container">
+            <a href="index.html" class="logo">Terra & Tide</a>
+            <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+        </div>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search products...">
+            <button id="search-btn">🔍</button>
+        </div>
         <nav>
             <ul>
                 <li><a href="collections.html">Collections</a></li>
                 <li><a href="about.html">Our Story</a></li>
                 <li id="nav-auth"><a href="login.html">Login</a></li>
+                <li><a href="wishlist.html">❤️</a></li>
                 <li>
                     <a href="cart.html" class="cart-icon">
                         🛒
@@ -28,6 +36,19 @@
 
     <div class="container">
         <h2 class="section-title">Living Collection</h2>
+
+        <div class="filter-controls">
+            <select id="sort-select" onchange="filterProducts()">
+                <option value="default">Sort by</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+            </select>
+            <select id="filter-select" onchange="filterProducts()">
+                <option value="all">All Items</option>
+                <option value="eco">Eco-Choice (Score 9+)</option>
+            </select>
+        </div>
+
         <div id="product-container" class="product-grid">
             <!-- Products loaded by script.js -->
         </div>
