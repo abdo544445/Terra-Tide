@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Terra & Tide</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Terra & Tide</a>
+        <nav>
+            <ul>
+                <li><a href="collections.html">Collections</a></li>
+                <li><a href="about.html">Our Story</a></li>
+                <li id="nav-auth"><a href="login.html">Login</a></li>
+                <li>
+                    <a href="cart.html" class="cart-icon">
+                        🛒
+                        <span id="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">Welcome Back</h2>
+        <form class="auth-form" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn-submit">Login</button>
+            <p class="mt-2 text-center">Don't have an account? <a href="signup.html">Sign up</a></p>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Terra & Tide. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = e.target.username.value;
+            const password = e.target.password.value;
+            // login function is defined in script.js
+            if (login(username, password)) {
+                window.location.href = 'index.html';
+            } else {
+                alert('Invalid credentials! Username must be > 3 chars and Password > 6 chars.');
+            }
+        }
+    </script>
+</body>
+</html>
